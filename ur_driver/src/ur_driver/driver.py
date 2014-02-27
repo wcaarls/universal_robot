@@ -18,6 +18,9 @@ from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
 from deserialize import RobotState, RobotMode
 
+from ur_msgs.msg import IOState
+from ur_msgs.srv import SetIOState, SetIOStateResponse
+
 prevent_programming = False
 
 # Joint offsets, pulled from calibration information stored in the URDF
@@ -37,6 +40,7 @@ MSG_MOVEJ = 4
 MSG_WAYPOINT_FINISHED = 5
 MSG_STOPJ = 6
 MSG_SERVOJ = 7
+MSG_SET_DIGITAL_OUT = 8
 MULT_jointstate = 10000.0
 MULT_time = 1000000.0
 MULT_blend = 1000.0
@@ -345,7 +349,11 @@ class CommanderTCPHandler(SocketServer.BaseRequestHandler):
     # Returns the last JointState message sent out
     def get_joint_states(self):
         return self.last_joint_states
-    
+        
+    def set_digital_out(self, n, b):
+        buf = struct.pack("!iii", MSG_SET_DIGITAL_OUT, n, b)
+        with self.socket_lock:
+            self.request.send(buf)
 
 class TCPServer(SocketServer.TCPServer):
     allow_reuse_address = True  # Allows the program to restart gracefully on crash
@@ -652,6 +660,14 @@ def get_my_ip(robot_ip, port):
     s.close()
     return tmp
 
+def handle_set_io_state(req):
+    r = getConnectedRobot(wait=False)
+    if r:
+        r.set_digital_out(req.state.pin, req.state.state)
+        return SetIOStateResponse()
+    else:
+        raise ROSServiceException("Robot not connected")
+
 def main():
     rospy.init_node('ur_driver', disable_signals=True)
     if rospy.get_param("use_sim_time", False):
@@ -691,6 +707,8 @@ def main():
     connection.connect()
     connection.send_reset_program()
     
+    srv_set_io = rospy.Service('set_io_state', SetIOState, handle_set_io_state)
+
     action_server = None
     try:
         while not rospy.is_shutdown():

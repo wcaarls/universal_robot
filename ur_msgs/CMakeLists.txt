@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ur_driver)
+project(ur_msgs)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS actionlib control_msgs rospy sensor_msgs ur_msgs)
+find_package(catkin REQUIRED COMPONENTS message_generation)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -13,31 +13,31 @@ find_package(catkin REQUIRED COMPONENTS actionlib control_msgs rospy sensor_msgs
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-catkin_python_setup()
+#catkin_python_setup()
 
 #######################################
 ## Declare ROS messages and services ##
 #######################################
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
+add_message_files(
+  FILES
+  IOState.msg
 #   Message2.msg
-# )
+)
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
+add_service_files(
+  FILES
+  SetIOState.srv
 #   Service2.srv
-# )
+)
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
+generate_messages(
 #   DEPENDENCIES
 #   control_msgs#   sensor_msgs
-# )
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -53,8 +53,6 @@ catkin_package(
 #  CATKIN_DEPENDS actionlib control_msgs rospy sensor_msgs
 #  DEPENDS system_lib
 )
-
-catkin_python_setup()
 
 ###########
 ## Build ##
