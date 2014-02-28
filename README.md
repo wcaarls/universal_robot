@@ -16,3 +16,8 @@ In order to start moveit! s.t. it can directly control the robot, close ur_bring
 $ roslaunch ur5_moveit_config moveit_planning_execution.launch sim:=false robot_ip:=IP_OF_THE_ROBOT
 
 Remember that you should always have your hands on the big red button in case there is something in the way, or anything unexcpected happens.
+
+Basic IO
+========
+
+This forked version supports basic digital IO. Output pins can be set using the set_io_state service, and input pin states are continually published on the io_states topic.
