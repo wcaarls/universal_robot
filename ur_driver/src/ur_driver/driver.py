@@ -18,7 +18,7 @@ from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
 from deserialize import RobotState, RobotMode
 
-from ur_msgs.msg import IOState
+from ur_msgs.msg import IOState, IOStates
 from ur_msgs.srv import SetIOState, SetIOStateResponse
 
 prevent_programming = False
@@ -41,6 +41,7 @@ MSG_WAYPOINT_FINISHED = 5
 MSG_STOPJ = 6
 MSG_SERVOJ = 7
 MSG_SET_DIGITAL_OUT = 8
+MSG_DIGITAL_IN = 9
 MULT_jointstate = 10000.0
 MULT_time = 1000000.0
 MULT_blend = 1000.0
@@ -57,6 +58,7 @@ connected_robot = None
 connected_robot_lock = threading.Lock()
 connected_robot_cond = threading.Condition(connected_robot_lock)
 pub_joint_states = rospy.Publisher('joint_states', JointState)
+pub_io_states = rospy.Publisher('io_states', IOStates)
 #dump_state = open('dump_state', 'wb')
 
 class EOF(Exception): pass
@@ -313,6 +315,16 @@ class CommanderTCPHandler(SocketServer.BaseRequestHandler):
                     waypoint_id = struct.unpack_from("!i", buf, 0)[0]
                     buf = buf[4:]
                     print "Waypoint finished (not handled)"
+                elif mtype == MSG_DIGITAL_IN:
+                    while len(buf) < 4:
+                        buf = buf + self.recv_more()
+                    inp = struct.unpack_from("!i", buf, 0)[0]
+                    buf = buf[4:]
+                    
+                    msg = IOStates()
+                    for i in range(0, 10):
+                        msg.states.append(IOState(i, (inp & (1<<i))>>i))
+                    pub_io_states.publish(msg)
                 else:
                     raise Exception("Unknown message type: %i" % mtype)
 

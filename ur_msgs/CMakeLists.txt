@@ -23,7 +23,7 @@ find_package(catkin REQUIRED COMPONENTS message_generation)
 add_message_files(
   FILES
   IOState.msg
-#   Message2.msg
+  IOStates.msg
 )
 
 ## Generate services in the 'srv' folder
